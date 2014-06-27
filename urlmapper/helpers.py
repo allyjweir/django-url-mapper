@@ -36,7 +36,7 @@ def check_mapped_url(key):
     """
     Check whether a URL is mapped.
     """
-    return (
+    return bool(
         key in settings.URLMAPPER_KEYS
         and (
             key in settings.URLMAPPER_FUNCTIONS
