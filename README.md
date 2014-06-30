@@ -169,5 +169,5 @@ Admins will only see fields for the available mapping type(s).
 To do
 -----
 
-- Tests
+- ~~More test coverage~~ (currently 94%)
 - Better widget for selecting a content object
