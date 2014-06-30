@@ -1,11 +1,9 @@
-from distutils.core import setup
-
-from setup_helpers import package_files
+from setuptools import setup, find_packages
 
 
 setup(
     name='django-url-mapper',
-    version='0.1.1',
+    version='0.2.0',
     author='Colin Barnwell',
     scripts=[],
     description='Use fixed keys in your Django template to refer to dynamic URLs',
@@ -13,5 +11,6 @@ setup(
     install_requires=[
         "Django >= 1.6",
     ],
-    **package_files(app_dir='urlmapper')
+    packages=find_packages(),
+    include_package_data=True
 )
