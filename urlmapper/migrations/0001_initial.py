@@ -1,49 +1,30 @@
 # -*- coding: utf-8 -*-
-from south.utils import datetime_utils as datetime
-from south.db import db
-from south.v2 import SchemaMigration
-from django.db import models
+from __future__ import unicode_literals
+
+from django.db import migrations, models
 
 
-class Migration(SchemaMigration):
+class Migration(migrations.Migration):
 
-    def forwards(self, orm):
-        # Adding model 'URLMap'
-        db.create_table(u'urlmapper_urlmap', (
-            (u'id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
-            ('key', self.gf('django.db.models.fields.CharField')(unique=True, max_length=64)),
-            ('url', self.gf('django.db.models.fields.URLField')(max_length=200, blank=True)),
-            ('content_type', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['contenttypes.ContentType'], null=True, blank=True)),
-            ('object_id', self.gf('django.db.models.fields.PositiveIntegerField')(null=True)),
-            ('view_name', self.gf('django.db.models.fields.CharField')(max_length=255, blank=True)),
-            ('view_keywords', self.gf('django.db.models.fields.TextField')(blank=True)),
-        ))
-        db.send_create_signal(u'urlmapper', ['URLMap'])
+    dependencies = [
+        ('contenttypes', '0002_remove_content_type_name'),
+    ]
 
-
-    def backwards(self, orm):
-        # Deleting model 'URLMap'
-        db.delete_table(u'urlmapper_urlmap')
-
-
-    models = {
-        u'contenttypes.contenttype': {
-            'Meta': {'ordering': "('name',)", 'unique_together': "(('app_label', 'model'),)", 'object_name': 'ContentType', 'db_table': "'django_content_type'"},
-            'app_label': ('django.db.models.fields.CharField', [], {'max_length': '100'}),
-            u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
-            'model': ('django.db.models.fields.CharField', [], {'max_length': '100'}),
-            'name': ('django.db.models.fields.CharField', [], {'max_length': '100'})
-        },
-        u'urlmapper.urlmap': {
-            'Meta': {'object_name': 'URLMap'},
-            'content_type': ('django.db.models.fields.related.ForeignKey', [], {'to': u"orm['contenttypes.ContentType']", 'null': 'True', 'blank': 'True'}),
-            u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
-            'key': ('django.db.models.fields.CharField', [], {'unique': 'True', 'max_length': '64'}),
-            'object_id': ('django.db.models.fields.PositiveIntegerField', [], {'null': 'True'}),
-            'url': ('django.db.models.fields.URLField', [], {'max_length': '200', 'blank': 'True'}),
-            'view_keywords': ('django.db.models.fields.TextField', [], {'blank': 'True'}),
-            'view_name': ('django.db.models.fields.CharField', [], {'max_length': '255', 'blank': 'True'})
-        }
-    }
-
-    complete_apps = ['urlmapper']
+    operations = [
+        migrations.CreateModel(
+            name='URLMap',
+            fields=[
+                ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
+                ('key', models.CharField(unique=True, max_length=64, verbose_name='Key', choices=[(b'terms-and-conditions', b'terms-and-conditions'), (b'awards', b'awards')])),
+                ('url', models.CharField(help_text='Enter a relative URL', max_length=255, verbose_name='URL', blank=True)),
+                ('object_id', models.PositiveIntegerField(null=True, verbose_name='Object ID', blank=True)),
+                ('view_name', models.CharField(max_length=255, verbose_name='View name', blank=True)),
+                ('view_keywords', models.TextField(help_text='Use a=b to define keywords and commas to separate e.g slug=terms-and-conditions, language=en', verbose_name='View keywords', blank=True)),
+                ('content_type', models.ForeignKey(verbose_name='Content Type', blank=True, to='contenttypes.ContentType', null=True)),
+            ],
+            options={
+                'verbose_name': 'URL map',
+                'verbose_name_plural': 'URL maps',
+            },
+        ),
+    ]
