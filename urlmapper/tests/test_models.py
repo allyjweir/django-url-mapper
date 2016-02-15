@@ -1,4 +1,5 @@
 from django.contrib.auth.models import User
+from django.contrib.flatpages.models import FlatPage
 from django.contrib.sites.models import Site
 from django.core.exceptions import ValidationError
 from django.contrib.contenttypes.models import ContentType
@@ -74,8 +75,8 @@ class TestModels(TestCase):
         with self.assertRaises(ValidationError):
             map.full_clean()
 
-        # get_absolute_url on user
-        user = User.objects.create_user('test')
+        # get_absolute_url on Flatpage which has get_absolute_url_defined
+        user = FlatPage.objects.create(url='test', title='A title')
         map = URLMap(
             key='test_4',
             content_object=user

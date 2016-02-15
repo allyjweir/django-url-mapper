@@ -1,44 +1,66 @@
-from django.conf import settings
-from django.core.management import call_command
+import sys
+import os
 
-settings.configure(
 
-    DATABASES={
-        "default": {
-            "ENGINE": "django.db.backends.sqlite3",
-        }
-    },
-    INSTALLED_APPS=(
-        'django.contrib.auth',
-        'django.contrib.contenttypes',
-        'django.contrib.sessions',
-        'django.contrib.staticfiles',
-        'django.contrib.sites',
-        'urlmapper'
-    ),
-    STATIC_URL='/',
-    MIDDLEWARE_CLASSES=(
-        'django.contrib.sessions.middleware.SessionMiddleware',
-        'django.middleware.common.CommonMiddleware',
-    ),
-    ROOT_URLCONF=('urlmapper.tests.urls'),
-    SITE_ID=1,
-    TEMPLATE_CONTEXT_PROCESSORS=(
-        'django.contrib.auth.context_processors.auth',
-        'django.core.context_processors.i18n',
-        'django.core.context_processors.request',
-    ),
-    URLMAPPER_KEYS=[
-        'test_1',
-        'test_2',
-        'test_3',
-        'test_4',
-        'test_5'
-    ],
-    URLMAPPER_FUNCTIONS={
-        'test_1': lambda: 'test_1_success',
-        'test_2': lambda request: 'test_2_success'
-    },
-)
 
-call_command('test')
+import django
+
+from django.test import TransactionTestCase
+
+from django.test.runner import DiscoverRunner as BaseRunner
+
+from mock import patch
+
+
+class NoDatabaseMixin(object):
+    """
+    Test runner mixin which skips the DB setup/teardown
+    when there are no subclasses of TransactionTestCase to improve the speed
+    of running the tests.
+    """
+
+    def build_suite(self, *args, **kwargs):
+        """
+        Check if any of the tests to run subclasses TransactionTestCase.
+        """
+        suite = super(NoDatabaseMixin, self).build_suite(*args, **kwargs)
+        self._needs_db = any([isinstance(test, TransactionTestCase) for test in suite])
+        return suite
+
+    def setup_databases(self, *args, **kwargs):
+        """
+        Skip test creation if not needed. Ensure that touching the DB raises and
+        error.
+        """
+        if self._needs_db:
+            return super(NoDatabaseMixin, self).setup_databases(*args, **kwargs)
+        if self.verbosity >= 1:
+            print 'No DB tests detected. Skipping Test DB creation...'
+        self._db_patch = patch('django.db.backends.util.CursorWrapper')
+        self._db_mock = self._db_patch.start()
+        self._db_mock.side_effect = RuntimeError('No testing the database!')
+        return None
+
+    def teardown_databases(self, *args, **kwargs):
+        """
+        Remove cursor patch.
+        """
+        if self._needs_db:
+            return super(NoDatabaseMixin, self).teardown_databases(*args, **kwargs)
+        self._db_patch.stop()
+        return None
+
+
+class FastTestRunner(NoDatabaseMixin, BaseRunner):
+    """Actual test runner sub-class to make use of the mixin."""
+    pass
+
+
+os.environ['DJANGO_SETTINGS_MODULE'] = 'urlmapper.tests.settings'
+django.setup()
+
+test_runner = FastTestRunner(verbosity=1)
+
+failures = test_runner.run_tests(['urlmapper', ], verbosity=1)
+if failures:
+    sys.exit(failures)
