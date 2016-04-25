@@ -1,5 +1,5 @@
 from models import URLMap
-import settings
+from django.conf import settings
 
 
 def get_mapped_url(key, request=None):
